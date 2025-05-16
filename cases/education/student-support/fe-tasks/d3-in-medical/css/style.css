@@ -1,0 +1,382 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    color: #333;
+    background-color: #f5f7fa;
+    line-height: 1.6;
+}
+
+/* 确保 header 固定在最顶部 */
+header {
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 101;  /* 确保在 controls 之上 */
+}
+
+/* 修改 controls 的固定定位 */
+/* 修改 controls 布局 */
+.controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;  /* 减小间距 */
+    padding: 15px;  /* 减小内边距 */
+    position: sticky;
+    top: 60px;  /* 调整与 header 的距离 */
+    background: #fff;  /* 改为白色背景 */
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+#severity-slider-container {
+    width: 350px;  /* 减小宽度 */
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;  /* 移除外边距 */
+}
+
+/* 添加响应式支持 */
+@media screen and (max-width: 768px) {
+    .controls {
+        flex-direction: column;
+        padding: 10px;
+        gap: 15px;
+    }
+    
+    #severity-slider-container {
+        width: 100%;
+        max-width: 350px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .controls {
+        position: relative;
+        top: 0;
+    }
+    
+    #severity-slider-container {
+        max-width: 300px;
+    }
+}
+
+/* 确保主容器有足够的滚动空间 */
+.main-container {
+    padding: 20px;
+    max-width: 1800px;
+    margin: 0 auto;
+    min-height: calc(100vh - 160px);  /* 减去 header 和 controls 的高度 */
+}
+
+h1 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+}
+
+h2 {
+    color: #34495e;
+    font-size: 18px;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #eee;
+}
+
+
+
+
+@media screen and (max-width: 768px) {
+    .main-container {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+    
+    .nav-group {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 0;
+    }
+    
+    .nav-item {
+        flex: 1;
+        text-align: center;
+    }
+}
+
+.nav-item:hover {
+    background: #f0f2f5;
+}
+
+.nav-item.active {
+    background: #e6f7ff;
+    color: #1890ff;
+    font-weight: 500;
+}
+
+main {
+    flex: 1;
+    min-width: 0;
+}
+
+.visualization-container {
+    height: 100%;
+}
+
+.chart-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    height: 100%;
+}
+
+.viz-panel {
+    background: #fff;
+    border-radius: 8px;
+    padding: 25px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 300px);  /* 减小初始高度 */
+    min-height: 350px;  /* 设置最小高度 */
+}
+
+.chart-description {
+    margin-bottom: 15px;
+}
+
+#sankey-chart,
+#parallel-chart,
+#heatmap-chart,
+#side-effect-chart {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.visualization-container {
+    display: block;  /* 改为块级显示 */
+    padding: 20px;
+}
+
+.viz-group {
+    margin-bottom: 30px;
+}
+
+.viz-panel {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;  /* 减小内边距 */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    min-height: 350px;  /* 进一步减小最小高度 */
+    position: relative;
+    overflow: visible;
+}
+
+/* 调整图表容器样式 */
+#sankey-chart,
+#parallel-chart,
+#heatmap-chart,
+#side-effect-chart {
+    flex: 1;
+    width: 100%;
+    min-height: 180px;
+    height: calc(100% - 25px);  /* 减少底部预留空间 */
+    margin-bottom: 10px;  /* 添加适当的底部间距 */
+}
+
+/* 调整图表说明样式 */
+.chart-description {
+    margin-bottom: 10px;  /* 减少描述文字的底部间距 */
+    font-size: 12px;  /* 稍微减小字体大小 */
+}
+
+/* 调整桑基图节点样式 */
+.node rect {
+    cursor: pointer;
+    fill-opacity: 0.85;
+    shape-rendering: crispEdges;
+    height: auto;  /* 允许节点高度自适应 */
+}
+
+/* 调整连接线样式 */
+.link {
+    fill: none;
+    stroke-opacity: 0.35;  /* 降低连接线透明度 */
+}
+
+.link:hover {
+    stroke-opacity: 0.6;
+}
+
+.axis text {
+    font-size: 11px;
+}
+
+.axis path, .axis line {
+    fill: none;
+    stroke: #ddd;
+    shape-rendering: crispEdges;
+}
+
+.brush .extent {
+    fill-opacity: .3;
+    stroke: #fff;
+    shape-rendering: crispEdges;
+}
+
+.selected-path {
+    stroke-opacity: 0.8;
+    stroke-width: 2;
+}
+
+.main-container {
+    padding: 20px;
+    max-width: 1800px;
+    margin: 0 auto;
+}
+
+main {
+    width: 100%;
+}
+
+.visualization-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+    padding: 20px;
+}
+
+/* 移除以下类的样式：
+- .sidebar
+- .nav-group
+- .nav-item
+- .nav-item:hover
+- .nav-item.active
+*/
+
+/* 保持其他样式不变 */
+
+
+/* 药物推荐项的动态效果 */
+#recommendation-content li {
+    transition: all 0.3s ease;
+    cursor: pointer;
+    padding: 12px;
+    border-radius: 6px;
+}
+
+#recommendation-content li:hover {
+    background: #f0f7ff;
+    transform: translateX(5px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* 进度条动画效果 */
+.progress-bar {
+    background: #edf2f7;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 8px;
+}
+
+.progress {
+    background: linear-gradient(90deg, #4299e1, #63b3ed);
+    height: 6px;
+    transition: width 0.6s ease-in-out;
+    transform-origin: left;
+    animation: progressGrow 0.8s ease-out;
+}
+
+@keyframes progressGrow {
+    from {
+        transform: scaleX(0);
+    }
+    to {
+        transform: scaleX(1);
+    }
+}
+
+/* 图表连接线动画 */
+.link {
+    transition: stroke-opacity 0.3s ease;
+}
+
+.node rect {
+    transition: fill-opacity 0.3s ease;
+}
+
+.node:hover rect {
+    fill-opacity: 1;
+}
+
+/* 桑基图流向标签样式 */
+.link-label {
+    font-size: 11px;
+    fill: #666;
+    pointer-events: none;
+}
+
+/* 桑基图连接线样式增强 */
+.link {
+    fill: none;
+    stroke-opacity: 0.4;
+    transition: all 0.3s ease;
+}
+
+.link:hover {
+    stroke-opacity: 0.8;
+    stroke-width: 2px;
+}
+
+/* 桑基图节点样式优化 */
+.node rect {
+    cursor: pointer;
+    fill-opacity: 0.85;
+    transition: all 0.3s ease;
+}
+
+.node:hover rect {
+    fill-opacity: 1;
+    stroke: #666;
+    stroke-width: 1px;
+}
+
+/* 节点文本标签样式 */
+.node text {
+    font-size: 12px;
+    font-weight: 500;
+    fill: #333;
+}
+
+/* 流向比例提示框样式 */
+.sankey-tooltip {
+    position: absolute;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    font-size: 12px;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.sankey-tooltip .percentage {
+    font-weight: bold;
+    color: #2c3e50;
+}

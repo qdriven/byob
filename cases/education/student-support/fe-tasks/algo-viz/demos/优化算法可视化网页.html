@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>优化算法可视化</title>
+  <style>
+    :root {
+      --primary-color: #3498db;
+      --secondary-color: #2c3e50;
+      --accent-color: #e74c3c;
+      --light-gray: #f5f5f5;
+      --dark-gray: #333;
+      --text-color: #444;
+      --border-radius: 6px;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: var(--text-color);
+      background-color: #fff;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    h1 {
+      color: var(--secondary-color);
+      margin-bottom: 10px;
+    }
+    
+    h2, h3 {
+      color: var(--secondary-color);
+      margin: 15px 0;
+    }
+    
+    .description {
+      max-width: 800px;
+      margin: 0 auto;
+      font-size: 1.1rem;
+    }
+    
+    .function-selector {
+      margin: 20px 0;
+      text-align: center;
+    }
+    
+    select {
+      padding: 8px 12px;
+      border-radius: var(--border-radius);
+      border: 1px solid #ccc;
+      font-size: 1rem;
+      background-color: white;
+    }
+    
+    .function-description {
+      max-width: 800px;
+      margin: 0 auto 30px;
+      padding: 15px;
+      background-color: var(--light-gray);
+      border-radius: var(--border-radius);
+    }
+    
+    .math-formula {
+      margin: 15px 0;
+      text-align: center;
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    .visualization-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 40px;
+    }
+    
+    #visualization {
+      width: 100%;
+      max-width: 800px;
+      height: 500px;
+      border: 1px solid #ddd;
+      border-radius: var(--border-radius);
+      margin-bottom: 20px;
+      background-color: white;
+    }
+    
+    .controls {
+      width: 100%;
+      max-width: 800px;
+      padding: 20px;
+      background-color: var(--light-gray);
+      border-radius: var(--border-radius);
+    }
+    
+    .optimizer-toggles, .parameters {
+      margin-bottom: 20px;
+    }
+    
+    .toggle-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    
+    .toggle {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+    
+    .toggle-label {
+      margin-left: 5px;
+      font-weight: 500;
+    }
+    
+    .parameter {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    
+    .parameter label {
+      width: 120px;
+    }
+    
+    .parameter input {
+      flex: 1;
+      margin: 0 10px;
+    }
+    
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+    
+    button {
+      padding: 8px 16px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background-color 0.2s;
+    }
+    
+    button:hover {
+      background-color: #2980b9;
+    }
+    
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    
+    .observations {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .observation-panel {
+      padding: 20px;
+      background-color: var(--light-gray);
+      border-radius: var(--border-radius);
+      margin-bottom: 30px;
+    }
+    
+    .observation-panel ul {
+      padding-left: 20px;
+      margin: 15px 0;
+    }
+    
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      padding: 20px 0;
+      color: var(--dark-gray);
+      font-size: 0.9rem;
+    }
+    
+    @media (max-width: 768px) {
+      .visualization-container {
+        flex-direction: column;
+      }
+      
+      #visualization, .controls {
+        width: 100%;
+      }
+      
+      .parameter {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .parameter label {
+        width: 100%;
+        margin-bottom: 5px;
+      }
+      
+      .parameter input {
+        width: 100%;
+        margin: 5px 0;
+      }
+    }
+  </style>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjs@11.8.0/lib/browser/math.min.js"></script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>优化算法可视化</h1>
+      <p class="description">
+        探索不同优化算法在2D非凸函数上的表现。点击函数图像上的任意位置开始优化过程，观察不同算法如何寻找最小值。
+      </p>
+    </header>
+
+    <div class="function-selector">
+      <label for="function-select">选择函数:</label>
+      <select id="function-select">
+        <option value="main">主函数 (二次函数+高斯)</option>
+        <option value="rastrigin">Rastrigin 函数</option>
+        <option value="rosenbrock">Rosenbrock 函数</option>
+      </select>
+    </div>
+
+    <div class="function-description">
+      <div id="main-description" class="function-info">
+        <h3>主函数</h3>
+        <p>该函数由二次"碗"和两个高斯函数组成，创建了两个局部最小值：</p>
+        <p class="math-formula">\[f(x, y) = x^2 + y^2 - a e^{-\frac{(x - 1)^2 + y^2}{c}} - b e^{-\frac{(x + 1)^2 + y^2}{d}}\]</p>
+        <p>其中参数 \(a\) 和 \(b\) 控制高斯函数的深度，\(c\) 和 \(d\) 控制高斯函数的宽度。</p>
+      </div>
+      <div id="rastrigin-description" class="function-info hidden">
+        <h3>Rastrigin 函数</h3>
+        <p>Rastrigin 函数是一个经典的优化测试函数，具有多个局部最小值：</p>
+        <p class="math-formula">\[f(x, y) = 20 + x^2 - 10\cos(2\pi x) + y^2 - 10\cos(2\pi y)\]</p>
+        <p>它由一个二次碗和正弦波组成，创建了大量的局部最小值，全局最小值位于 (0,0)。</p>
+      </div>
+      <div id="rosenbrock-description" class="function-info hidden">
+        <h3>Rosenbrock 函数</h3>
+        <p>Rosenbrock 函数（香蕉函数）是另一个经典的优化测试函数：</p>
+        <p class="math-formula">\[f(x, y) = (1 - x)^2 + 100(y - x^2)^2\]</p>
+        <p>它的全局最小值位于弯曲的山谷内，算法通常很容易找到山谷，但很难找到山谷内的最小值。</p>
+      </div>
+    </div>
+
+    <div class="visualization-container">
+      <div id="visualization"></div>
+      
+      <div class="controls">
+        <div class="optimizer-toggles">
+          <h3>优化算法</h3>
+          <div class="toggle-group">
+            <label class="toggle">
+              <input type="checkbox" id="sgd-toggle" checked>
+              <span class="toggle-label" style="color: #1f77b4;">SGD</span>
+            </label>
+            <label class="toggle">
+              <input type="checkbox" id="momentum-toggle" checked>
+              <span class="toggle-label" style="color: #ff7f0e;">动量SGD</span>
+            </label>
+            <label class="toggle">
+              <input type="checkbox" id="rmsprop-toggle" checked>
+              <span class="toggle-label" style="color: #2ca02c;">RMSProp</span>
+            </label>
+            <label class="toggle">
+              <input type="checkbox" id="adam-toggle" checked>
+              <span class="toggle-label" style="color: #d62728;">Adam</span>
+            </label>
+          </div>
+        </div>
+        
+        <div class="parameters">
+          <h3>参数设置</h3>
+          <div class="parameter">
+            <label for="learning-rate">学习率:</label>
+            <input type="range" id="learning-rate" min="0.001" max="0.1" step="0.001" value="0.01">
+            <span id="learning-rate-value">0.01</span>
+          </div>
+          <div class="parameter">
+            <label for="momentum">动量值:</label>
+            <input type="range" id="momentum" min="0" max="0.99" step="0.01" value="0.9">
+            <span id="momentum-value">0.9</span>
+          </div>
+          <div class="parameter">
+            <label for="iterations">最大迭代次数:</label>
+            <input type="range" id="iterations" min="10" max="500" step="10" value="100">
+            <span id="iterations-value">100</span>
+          </div>
+        </div>
+        
+        <div class="buttons">
+          <button id="reset-button">重置</button>
+          <button id="animate-button">动画展示</button>
+          <button id="stop-button" disabled>停止</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="observations">
+      <h2>观察与分析</h2>
+      <div class="observation-panel">
+        <h3>不同优化算法的比较</h3>
+        <ul>
+          <li><strong>SGD</strong>: 学习过程缓慢，容易陷入局部最小值</li>
+          <li><strong>动量SGD</strong>: 加速收敛，但可能会在最小值附近震荡</li>
+          <li><strong>RMSProp</strong>: 自适应学习率，对不同特征维度有不同的学习率</li>
+          <li><strong>Adam</strong>: 结合了动量和自适应学习率，通常表现最稳定</li>
+        </ul>
+        <p>点击函数图像开始优化，观察不同算法的行为差异。</p>
+      </div>
+    </div>
+
+    <footer>
+      <p>优化算法可视化 | 基于D3.js实现</p>
+    </footer>
+  </div>
+
+  <script>
+    // 测试函数实现
+    const functions = {
+      // 主函数：二次函数 + 两个高斯函数
+      main: function(x, y, params = {}) {
+        const a = params.a || 1.5;
+        const b = params.b || 1.0;
+        const c = params.c || 0.2;
+        const d = params.d || 0.2;
+        
+        return x*x + y*y - 
+              a * Math.exp(-((x-1)*(x-1) + y*y)/c) - 
+              b * Math.exp(-((x+1)*(x+1) + y*y)/d);
+      },
+      
+      // Rastrigin函数
+      rastrigin: function(x, y) {
+        const A = 10;
+        return 2*A + x*x - A*Math.cos(2*Math.PI*x) + 
+              y*y - A*Math.cos(2*Math.PI*y);
+      },
+      
+      // Rosenbrock函数
+      rosenbrock: function(x, y) {
+        const a = 1, b = 100;
+        return Math.pow(a - x, 2) + b * Math.pow(y - x*x, 2);
+      }
+    };
+    
+    // 计算梯度
+    function gradient(func, x, y, params = {}, h = 1e-4) {
+      const fx1 = func(x + h, y, params);
+      const fx2 = func(x - h, y, params);
+      const fy1 = func(x, y + h, params);
+      const fy2 = func(x, y - h, params);
+      
+      const dx = (fx1 - fx2) / (2 * h);
+      const dy = (fy1 - fy2) / (2 * h);
+      
+      return [dx, dy];
+    }
+    
+    // 函数域范围配置
+    const functionDomains = {
+      main: {
+        xDomain: [-2, 2],
+        yDomain: [-2, 2]
+      },
+      rastrigin: {
+        xDomain: [-5, 5],
+        yDomain: [-5, 5]
+      },
+      rosenbrock: {
+        xDomain: [-2, 2],
+        yDomain: [-1, 3]
+      }
+    };
+    
+    // 优化器实现
+    class Optimizer {
+      constructor(params = {}) {
+        this.lr = params.lr || 0.01;
+      }
+      
+      step(gradient) {
+        throw new Error("Not implemented");
+      }
+      
+      reset() {
+        // 重置优化器状态
+      }
+    }
+    
+    class SGD extends Optimizer {
+      constructor(params = {}) {
+        super(params);
+      }
+      
+      step(gradient) {
+        return gradient.map(g => g * this.lr);
+      }
+      
+      reset() {
+        // SGD没有状态需要重置
+      }
+    }
+    
+    class MomentumSGD extends Optimizer {
+      constructor(params = {}) {
+        super(params);
+        this.momentum = params.momentum || 0.9;
+        this.velocity = [0, 0];
+      }
+      
+      step(gradient) {
+        this.velocity = this.velocity.map((v, i) => 
+          this.momentum * v - this.lr * gradient[i]);
+        return [...this.velocity];
+      }
+      
+      reset() {
+        this.velocity = [0, 0];
+      }
+    }
+    
+    class RMSProp extends Optimizer {
+      constructor(params = {}) {
+        super(params);
+        this.decay = params.decay || 0.99;
+        this.epsilon = params.epsilon || 1e-8;
+        this.cache = [0, 0];
+      }
+      
+      step(gradient) {
+        this.cache = this.cache.map((c, i) => 
+          this.decay * c + (1 - this.decay) * gradient[i] * gradient[i]);
+        
+        return gradient.map((g, i) => 
+          (this.lr * g) / (Math.sqrt(this.cache[i]) + this.epsilon));
+      }
+      
+      reset() {
+        this.cache = [0, 0];
+      }
+    }
+    
+    class Adam extends Optimizer {
+      constructor(params = {}) {
+        super(params);
+        this.beta1 = params.beta1 || 0.9;
+        this.beta2 = params.beta2 || 0.999;
+        this.epsilon = params.epsilon || 1e-8;
+        this.m = [0, 0];
+        this.v = [0, 0];
+        this.t = 0;
+      }
+      
+      step(gradient) {
+        this.t += 1;
+        
+        // Update biased first moment estimate
+        this.m = this.m.map((m, i) => 
+          this.beta1 * m + (1 - this.beta1) * gradient[i]);
+        
+        // Update biased second raw moment estimate
+        this.v = this.v.map((v, i) => 
+          this.beta2 * v + (1 - this.beta2) * gradient[i] * gradient[i]);
+        
+        // Compute bias-corrected first moment estimate
+        const mCorrected = this.m.map(m => 
+          m / (1 - Math.pow(this.beta1, this.t)));
+        
+        // Compute bias-corrected second raw moment estimate
+        const vCorrected = this.v.map(v => 
+          v / (1 - Math.pow(this.beta2, this.t)));
+        
+        // Update parameters
+        return mCorrected.map((m, i) => 
+          (this.lr * m) / (Math.sqrt(vCorrected[i]) + this.epsilon));
+      }
+      
+      reset() {
+        this.m = [0, 0];
+        this.v = [0, 0];
+        this.t = 0;
+      }
+    }
+    
+    // 主要可视化逻辑
+    document.addEventListener('DOMContentLoaded', function() {
+      // DOM元素
+      const visualizationContainer = document.getElementById('visualization');
+      const functionSelect = document.getElementById('function-select');
+      const resetButton = document.getElementById('reset-button');
+      const animateButton = document.getElementById('animate-button');
+      const stopButton = document.getElementById('stop-button');
+      const learningRateInput = document.getElementById('learning-rate');
+      const learningRateValue = document.getElementById('learning-rate-value');
+      const momentumInput = document.getElementById('momentum');
+      const momentumValue = document.getElementById('momentum-value');
+      const iterationsInput = document.getElementById('iterations');
+      const iterationsValue = document.getElementById('iterations-value');
+      
+      // 函数描述元素
+      const functionDescriptions = {
+        main: document.getElementById('main-description'),
+        rastrigin: document.getElementById('rastrigin-description'),
+        rosenbrock: document.getElementById('rosenbrock-description')
+      };
+      
+      // 优化器切换
+      const optimizerToggles = {
+        sgd: document.getElementById('sgd-toggle'),
+        momentum: document.getElementById('momentum-toggle'),
+        rmsprop: document.getElementById('rmsprop-toggle'),
+        adam: document.getElementById('adam-toggle')
+      };
+      
+      // 配置
+      let config = {
+        width: visualizationContainer.clientWidth,
+        height: 500,
+        margin: { top: 20, right: 20, bottom: 40, left: 40 },
+        currentFunction: 'main',
+        learningRate: 0.01,
+        momentum: 0.9,
+        maxIterations: 100,
+        animationSpeed: 20, // 毫秒/迭代
+        activeOptimizers: ['sgd', 'momentum', 'rmsprop', 'adam'],
+        colors: {
+          sgd: '#1f77b4',
+          momentum: '#ff7f0e',
+          rmsprop: '#2ca02c',
+          adam: '#d62728'
+        },
+        isAnimating: false,
+        animationId: null
+      };
+      
+      // 优化器实例
+      const optimizers = {
+        sgd: new SGD({ lr: config.learningRate }),
+        momentum: new MomentumSGD({ lr: config.learningRate, momentum: config.momentum }),
+        rmsprop: new RMSProp({ lr: config.learningRate }),
+        adam: new Adam({ lr: config.learningRate })
+      };
+      
+      // 可视化状态
+      let state = {
+        svg: null,
+        xScale: null,
+        yScale: null,
+        contourGroup: null,
+        pathGroup: null,
+        paths: {},
+        currentPosition: null,
+        functionParams: { a: 1.5, b: 1.0, c: 0.2, d: 0.2 }
+      };
+      
+      // 初始化可视化
+      function initVisualization() {
+        // 清除现有内容
+        visualizationContainer.innerHTML = '';
+        
+        // 创建SVG
+        state.svg = d3.select(visualizationContainer)
+          .append('svg')
+          .attr('width', config.width)
+          .attr('height', config.height)
+          .append('g')
+          .attr('transform', `translate(${config.margin.left},${config.margin.top})`);
+        
+        const domain = functionDomains[config.currentFunction];
+        
+        // 设置比例尺
+        state.xScale = d3.scaleLinear()
+          .domain(domain.xDomain)
+          .range([0, config.width - config.margin.left - config.margin.right]);
+        
+        state.yScale = d3.scaleLinear()
+          .domain(domain.yDomain)
+          .range([config.height - config.margin.top - config.margin.bottom, 0]);
+        
+        // 添加X轴
+        state.svg.append('g')
+          .attr('transform', `translate(0,${config.height - config.margin.top - config.margin.bottom})`)
+          .call(d3.axisBottom(state.xScale));
+        
+        // 添加Y轴
+        state.svg.append('g')
+          .call(d3.axisLeft(state.yScale));
+        
+        // 创建等高线组
+        state.contourGroup = state.svg.append('g')
+          .attr('class', 'contours');
+        
+        // 创建路径组
+        state.pathGroup = state.svg.append('g')
+          .attr('class', 'path-group');
+        
+        // 创建等高线
+        createContourPlot();
+        
+        // 添加点击事件
+        state.svg.on('click', function(event) {
+          if (config.isAnimating) return;
+          
+          const [x, y] = d3.pointer(event);
+          const realX = state.xScale.invert(x);
+          const realY = state.yScale.invert(y);
+          
+          resetPaths();
+          startOptimization(realX, realY);
+        });
+      }
+      
+      // 创建等高线图
+      function createContourPlot() {
+        const n = 100; // 网格大小
+        const data = new Array(n * n);
+        const width = config.width - config.margin.left - config.margin.right;
+        const height = config.height - config.margin.top - config.margin.bottom;
+        
+        // 计算函数值
+        for (let j = 0; j < n; j++) {
+          for (let i = 0; i < n; i++) {
+            const x = state.xScale.invert(i * width / (n - 1));
+            const y = state.yScale.invert(j * height / (n - 1));
+            data[j * n + i] = functions[config.currentFunction](x, y, state.functionParams);
+          }
+        }
+        
+        // 创建等高线
+        const contours = d3.contours()
+          .size([n, n])
+          .thresholds(20)
+          (data);
+        
+        // 颜色比例尺
+        const colorScale = d3.scaleSequential(d3.interpolateViridis)
+          .domain(d3.extent(data));
+        
+        // 绘制等高线
+        state.contourGroup.selectAll('path')
+          .data(contours)
+          .join('path')
+          .attr('d', d3.geoPath(d3.geoIdentity().scale(width / n)))
+          .attr('fill', d => colorScale(d.value))
+          .attr('stroke', 'none');
+      }
+      
+      // 重置路径
+      function resetPaths() {
+        state.pathGroup.selectAll('*').remove();
+        state.paths = {};
+        state.currentPosition = null;
+        
+        // 重置优化器状态
+        Object.values(optimizers).forEach(opt => opt.reset());
+      }
+      
+      // 开始优化
+      function startOptimization(x, y) {
+        state.currentPosition = [x, y];
+        
+        // 为每个激活的优化器创建路径
+        config.activeOptimizers.forEach(name => {
+          state.paths[name] = {
+            points: [[x, y]],
+            path: state.pathGroup.append('path')
+              .attr('fill', 'none')
+              .attr('stroke', config.colors[name])
+              .attr('stroke-width', 2)
+          };
+        });
+        
+        // 添加起始点
+        state.pathGroup.append('circle')
+          .attr('class', 'position-point')
+          .attr('cx', state.xScale(x))
+          .attr('cy', state.yScale(y))
+          .attr('r', 5)
+          .attr('fill', 'black');
+        
+        // 运行优化
+        runFullOptimization();
+      }
+      
+      // 运行完整优化
+      function runFullOptimization() {
+        const minGradNorm = 1e-6;
+        
+        for (let i = 0; i < config.maxIterations; i++) {
+          let allConverged = true;
+          
+          config.activeOptimizers.forEach(name => {
+            const path = state.paths[name];
+            const lastPoint = path.points[path.points.length - 1];
+            const [x, y] = lastPoint;
+            
+            // 计算梯度
+            const grad = gradient(functions[config.currentFunction], x, y, state.functionParams);
+            const gradNorm = Math.sqrt(grad[0]*grad[0] + grad[1]*grad[1]);
+            
+            if (gradNorm > minGradNorm) {
+              allConverged = false;
+              
+              // 应用优化器更新
+              const update = optimizers[name].step(grad);
+              const newX = x - update[0];
+              const newY = y - update[1];
+              
+              path.points.push([newX, newY]);
+            }
+          });
+          
+          if (allConverged) break;
+        }
+        
+        // 更新路径可视化
+        updatePaths();
+        
+        // 添加终点
+        config.activeOptimizers.forEach(name => {
+          const path = state.paths[name];
+          const [x, y] = path.points[path.points.length - 1];
+          
+          state.pathGroup.append('circle')
+            .attr('class', 'position-point')
+            .attr('cx', state.xScale(x))
+            .attr('cy', state.yScale(y))
+            .attr('r', 4)
+            .attr('fill', config.colors[name]);
+        });
+      }
+      
+      // 动画优化过程
+      function animateOptimization() {
+        if (state.currentPosition === null) return;
+        
+        // 禁用按钮
+        animateButton.disabled = true;
+        stopButton.disabled = false;
+        config.isAnimating = true;
+        
+        // 重置路径
+        resetPaths();
+        
+        const [x, y] = state.currentPosition;
+        
+        // 为每个激活的优化器创建路径
+        config.activeOptimizers.forEach(name => {
+          state.paths[name] = {
+            points: [[x, y]],
+            path: state.pathGroup.append('path')
+              .attr('fill', 'none')
+              .attr('stroke', config.colors[name])
+              .attr('stroke-width', 2)
+          };
+        });
+        
+        // 添加起始点
+        state.pathGroup.append('circle')
+          .attr('class', 'position-point')
+          .attr('cx', state.xScale(x))
+          .attr('cy', state.yScale(y))
+          .attr('r', 5)
+          .attr('fill', 'black');
+        
+        // 动画变量
+        let iteration = 0;
+        const minGradNorm = 1e-6;
+        
+        // 动画函数

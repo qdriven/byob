@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Optimization Algorithm Visualization</title>
+		<link rel="stylesheet" type="text/css" href="index.css">
+	</head>
+	<body>
+		<div id="container">
+			<div id="controls">
+				<div class="control-group">
+					<h3>Function Selection</h3>
+					<select id="function-select" style="width: 100%; margin-bottom: 15px;">
+						<option value="himmelblau">Himmelblau Function</option>
+						<option value="rastrigin">Rastrigin Function</option>
+						<option value="rosenbrock">Rosenbrock Function</option>
+						<option value="booth">Booth Function</option>
+						<option value="beale">Beale Function</option>
+						<option value="threehumpcamel">Three-Hump Camel Function</option>
+						<option value="matyas">Matyas Functionl</option>
+					</select>
+					<div id="function-description" style="font-size: 12px; margin-bottom: 20px;"></div>
+				</div>
+
+				<div class="control-group">
+					<h3>Algorithms</h3>
+					<div class="algorithm-options">
+						<div class="algorithm-option">
+							<input type="checkbox" id="algo-sgd" value="sgd" checked>
+							<span class="algorithm-color-block algorithm-color-sgd"></span>
+							<label for="algo-sgd">SGD</label>
+						</div>
+						<div class="algorithm-option">
+							<input type="checkbox" id="algo-momentum" value="momentum">
+							<span class="algorithm-color-block algorithm-color-momentum"></span>
+							<label for="algo-momentum">SGD with Momentum</label>
+						</div>
+						<div class="algorithm-option">
+							<input type="checkbox" id="algo-rmsprop" value="rmsprop">
+							<span class="algorithm-color-block algorithm-color-rmsprop"></span>
+							<label for="algo-rmsprop">RMSProp</label>
+						</div>
+						<div class="algorithm-option">
+							<input type="checkbox" id="algo-adam" value="adam">
+							<span class="algorithm-color-block algorithm-color-adam"></span>
+							<label for="algo-adam">Adam</label>
+						</div>
+						<div class="algorithm-option">
+							<input type="checkbox" id="algo-nag" value="nag">
+							<span class="algorithm-color-block algorithm-color-nag"></span>
+							<label for="algo-nag">Nesterov Accelerated Gradient</label>
+						</div>
+					</div>
+					<div id="algorithm-description" style="font-size: 12px; margin-bottom: 20px;"></div>
+				</div>
+
+				<div class="control-group">
+					<h3>Parameters</h3>
+					<div class="parameter">
+						<label>Learning rate:</label>
+						<input type="range" id="learning-rate" min="0.0001" max="0.05" step="0.0001" value="0.01">
+						<span id="learning-rate-value">0.01</span>
+					</div>
+					<div class="parameter">
+						<label>Steps:</label>
+						<input type="range" id="num-steps" min="10" max="500" step="1" value="100">
+						<span id="steps-value">100</span>
+					</div>
+				</div>
+
+				<div class="control-group">
+					<h3>Animation</h3>
+					<div class="parameter">
+						<label>Speed:</label>
+						<input type="range" id="animation-speed" min="1" max="10" step="1" value="5">
+						<span id="speed-value">5</span>
+					</div>
+				</div>
+			</div>
+
+			<div id="graph-container">
+				<div id="graph"></div>
+				<div id="coordinates">
+					<div>X: <span id="x-coord">0.00</span></div>
+					<div>Y: <span id="y-coord">0.00</span></div>
+					<div>f(x,y): <span id="f-val">0.00</span></div>
+				</div>
+			</div>
+		</div>
+		<!-- Load scripts at the end of body -->
+		<script src="d3-v4-min.js"></script>
+		<script src="d3-scale-chromatic.v1.min.js"></script>
+		<script src="d3-contour-v1-min.js"></script>
+		<script src="data.js"></script>
+		<script src="drawft.js"></script>
+		<script src="function.js"></script>
+	</body>
+</html>
