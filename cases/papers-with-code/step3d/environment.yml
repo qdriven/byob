@@ -1,0 +1,18 @@
+name: playground
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - numpy>=1.24.0
+  - networkx>=3.1
+  - matplotlib>=3.7.0
+  - pyvista=0.39.0
+  - pythonocc-core=7.7.0
+  - pip
+  - pip:
+    - pytest>=7.0.0
+    - pytest-cov>=4.0.0
+    - black>=23.0.0
+    - isort>=5.0.0
+    - mypy>=1.0.0 
