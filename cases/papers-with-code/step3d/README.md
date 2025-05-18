@@ -19,7 +19,7 @@ STEP文件特征识别和3D可视化工具。
 conda env create -f environment.yml
 
 # 激活环境
-conda activate step3d
+conda activate papers
 ```
 
 2. 安装项目包：

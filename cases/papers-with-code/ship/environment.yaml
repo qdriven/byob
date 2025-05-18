@@ -1,0 +1,24 @@
+name: papers
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.12
+  - pip
+  - numpy
+  - scipy
+  - matplotlib
+  - pytorch
+  - torchvision
+  - tqdm
+  - pandas
+  - scikit-learn
+  - ipython
+  - jupyter
+  - pip:
+    - ezdxf  # For CAD file export
+    - networkx  # For graph operations
+    - pydot  # For graph visualization
+    - svgwrite  # For SVG export
+    - pytest # For testing
