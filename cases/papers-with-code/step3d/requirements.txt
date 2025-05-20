@@ -1,0 +1,6 @@
+numpy>=1.19.0
+PyQt5>=5.15.0
+PyQt5-sip>=12.8.0
+PyQt5-Qt5>=5.15.0
+OCC-Core>=7.5.0
+pythonocc-core>=7.5.0
